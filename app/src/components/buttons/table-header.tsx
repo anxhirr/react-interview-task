@@ -1,4 +1,4 @@
-import { Column } from "@tanstack/react-table";
+import { Column, RowData } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "../ui/button";
 
@@ -7,7 +7,7 @@ const TableHeaderBtn = ({
   column,
 }: {
   children: React.ReactNode;
-  column: Column<any>;
+  column: Column<RowData>;
 }) => {
   return (
     <Button
