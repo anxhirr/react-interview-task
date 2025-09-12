@@ -35,7 +35,7 @@ import { createJobAction, getCategoriesAction } from "@/lib/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronDown, X } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
@@ -67,6 +67,7 @@ type SchemaT = z.infer<typeof schema>;
 
 const Content = ({ onOpenChange }: Props) => {
   const router = useRouter();
+  const { status } = useParams<{ status: JobT["status"] }>();
 
   const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
     queryKey: ["categories"],
@@ -77,7 +78,7 @@ const Content = ({ onOpenChange }: Props) => {
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
-      status: "in_progress",
+      status,
       categoryIds: [],
     },
   });
