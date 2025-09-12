@@ -50,6 +50,7 @@ const getJobAction = async (jobId: string) => {
 };
 
 const getJobsAction = async (status: JobT["status"]) => {
+  const now = Date.now();
   const data = await db.query.job.findMany({
     where: eq(job.status, status),
     with: {
@@ -61,6 +62,7 @@ const getJobsAction = async (status: JobT["status"]) => {
       items: true,
     },
   });
+  console.log(`getJobsAction: ${status} took ${Date.now() - now}ms`);
   return data;
 };
 
