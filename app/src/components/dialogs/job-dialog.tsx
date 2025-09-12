@@ -1,5 +1,6 @@
 "use client";
 
+import { DialogActions } from "@/components/dialogs/dialog-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,13 +24,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { JobT } from "@/db/types";
 import { createJobAction, getCategoriesAction } from "@/lib/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,6 +32,7 @@ import { Check, ChevronDown, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
+import { StatusSelect } from "../selects";
 
 type Props = {
   open: boolean;
@@ -148,21 +143,10 @@ const Content = ({ onOpenChange }: Props) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Status</FormLabel>
-                <Select
+                <StatusSelect
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="on_hold">On Hold</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                  </SelectContent>
-                </Select>
+                  value={field.value}
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -184,7 +168,7 @@ const Content = ({ onOpenChange }: Props) => {
                             className="w-full justify-between h-10 px-3 py-2 text-sm"
                           >
                             Select a category to add
-                            <ChevronDown className="h-4 w-4 opacity-50" />
+                            <ChevronDown className=" opacity-50" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-full min-w-[200px]">
@@ -205,7 +189,7 @@ const Content = ({ onOpenChange }: Props) => {
                               >
                                 <span>{category.name}</span>
                                 {formCategoryIds.includes(category.id) && (
-                                  <Check className="h-4 w-4 text-green-600" />
+                                  <Check className=" text-green-600" />
                                 )}
                               </DropdownMenuItem>
                             ))
@@ -250,18 +234,10 @@ const Content = ({ onOpenChange }: Props) => {
             )}
           />
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Creating..." : "Create Job Site"}
-            </Button>
-          </div>
+          <DialogActions
+            onOpenChange={onOpenChange}
+            isSubmitting={form.formState.isSubmitting}
+          />
         </form>
       </Form>
     </>

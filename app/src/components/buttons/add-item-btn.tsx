@@ -15,7 +15,7 @@ const AddItemBtn = () => {
   return (
     <>
       <Button onClick={onClick}>
-        <Plus className="h-4 w-4 mr-2" />
+        <Plus />
         Add Item
       </Button>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { DialogActions } from "@/components/dialogs/dialog-actions";
 import {
   Dialog,
   DialogContent,
@@ -169,24 +169,10 @@ const Content = ({ onOpenChange, item }: Props) => {
             )}
           />
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting
-                ? isEditing
-                  ? "Updating..."
-                  : "Creating..."
-                : isEditing
-                ? "Update Item"
-                : "Create Item"}
-            </Button>
-          </div>
+          <DialogActions
+            onOpenChange={onOpenChange}
+            isSubmitting={form.formState.isSubmitting}
+          />
         </form>
       </Form>
     </>

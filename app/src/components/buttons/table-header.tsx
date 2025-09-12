@@ -15,7 +15,7 @@ const TableHeaderBtn = <T extends RowData>({
       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
     >
       {children}
-      <ArrowUpDown className="ml-2 h-4 w-4" />
+      <ArrowUpDown />
     </Button>
   );
 };
