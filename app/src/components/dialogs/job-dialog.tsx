@@ -103,7 +103,9 @@ const Content = ({ onOpenChange }: Props) => {
   const addCategory = (categoryIdToAdd: string) => {
     const currentCategories = form.getValues("categoryIds");
     if (!currentCategories.includes(categoryIdToAdd)) {
-      form.setValue("categoryIds", [...currentCategories, categoryIdToAdd]);
+      form.setValue("categoryIds", [...currentCategories, categoryIdToAdd], {
+        shouldValidate: true,
+      });
     }
   };
 
@@ -111,7 +113,10 @@ const Content = ({ onOpenChange }: Props) => {
     const currentCategories = form.getValues("categoryIds");
     form.setValue(
       "categoryIds",
-      currentCategories.filter((cat) => cat !== categoryIdToRemove)
+      currentCategories.filter((cat) => cat !== categoryIdToRemove),
+      {
+        shouldValidate: true,
+      }
     );
   };
 
