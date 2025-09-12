@@ -3,7 +3,6 @@
 import { ItemT } from "@/db/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
-import { TableHeaderBtn } from "../buttons";
 import { ItemDialog } from "../dialogs";
 import { DataTable } from "../ui/data-table";
 
@@ -15,9 +14,7 @@ type Props = {
 const columns: ColumnDef<ItemT>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <TableHeaderBtn column={column}>Name</TableHeaderBtn>
-    ),
+    header: "Name",
     cell: ({ row }) => {
       const item = row.original;
       return (
@@ -29,9 +26,7 @@ const columns: ColumnDef<ItemT>[] = [
   },
   {
     accessorKey: "quantity",
-    header: ({ column }) => (
-      <TableHeaderBtn column={column}>Quantity</TableHeaderBtn>
-    ),
+    header: "Quantity",
     cell: ({ row }) => {
       const quantity = row.getValue("quantity") as number;
       return (
@@ -41,9 +36,7 @@ const columns: ColumnDef<ItemT>[] = [
   },
   {
     accessorKey: "description",
-    header: ({ column }) => (
-      <TableHeaderBtn column={column}>Description</TableHeaderBtn>
-    ),
+    header: "Description",
     cell: ({ row }) => {
       const description = row.getValue("description") as string;
       return (
@@ -53,9 +46,7 @@ const columns: ColumnDef<ItemT>[] = [
   },
   {
     accessorKey: "notes",
-    header: ({ column }) => (
-      <TableHeaderBtn column={column}>Notes</TableHeaderBtn>
-    ),
+    header: "Notes",
     cell: ({ row }) => {
       const notes = row.getValue("notes") as string;
       return (

@@ -9,7 +9,6 @@ import {
 import { ItemT, JobCategoryT, JobT } from "@/db/types";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
-import { TableHeaderBtn } from "../buttons";
 import { DataTable } from "../ui/data-table";
 
 type DataT = JobsActionT["data"][number];
@@ -17,9 +16,7 @@ type DataT = JobsActionT["data"][number];
 const columns: ColumnDef<DataT>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <TableHeaderBtn column={column}>Job Site Name</TableHeaderBtn>
-    ),
+    header: "Name",
     cell: ({ row }) => {
       const job = row.original;
       const firstCategory = job.jobCategories[0]?.category;
@@ -35,9 +32,7 @@ const columns: ColumnDef<DataT>[] = [
   },
   {
     accessorKey: "status",
-    header: ({ column }) => (
-      <TableHeaderBtn column={column}>Status</TableHeaderBtn>
-    ),
+    header: "Status",
     cell: ({ row }) => {
       const status = row.getValue("status") as JobT["status"];
       return (
@@ -49,9 +44,7 @@ const columns: ColumnDef<DataT>[] = [
   },
   {
     accessorKey: "jobCategories",
-    header: ({ column }) => (
-      <TableHeaderBtn column={column}>Categories</TableHeaderBtn>
-    ),
+    header: "Categories",
     cell: ({ row }) => {
       const jobCategories = row.getValue("jobCategories") as JobCategoryT[];
       return <div>{jobCategories.length}</div>;
@@ -59,9 +52,7 @@ const columns: ColumnDef<DataT>[] = [
   },
   {
     accessorKey: "items",
-    header: ({ column }) => (
-      <TableHeaderBtn column={column}>Items</TableHeaderBtn>
-    ),
+    header: "Items",
     cell: ({ row }) => {
       const items = row.getValue("items") as ItemT[];
       return <div>{items.length}</div>;
