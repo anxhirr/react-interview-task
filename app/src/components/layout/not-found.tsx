@@ -10,7 +10,7 @@ const NotFoundComponent = () => {
         <p className="text-lg text-gray-600 mb-8">
           The page you are looking for does not exist.
         </p>
-        <Link href="/jobsites/in_progress">
+        <Link href="/job/list/in_progress">
           <Button>
             <ArrowLeft />
             Back to Job Sites

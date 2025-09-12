@@ -44,7 +44,7 @@ type Props = {
   onOpenChange: (open: boolean) => void;
 };
 
-const Component = ({ open, onOpenChange }: Props) => {
+const JobDialog = ({ open, onOpenChange }: Props) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -262,4 +262,4 @@ const Content = ({ onOpenChange }: Props) => {
   );
 };
 
-export { Component as CreateJobSiteModal };
+export { JobDialog };

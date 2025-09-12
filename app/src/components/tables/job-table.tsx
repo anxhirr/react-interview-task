@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -8,7 +9,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ItemT } from "@/db/types";
+import {
+  JOB_SITE_STATUS_COLORS,
+  JOB_SITE_STATUS_LABELS,
+} from "@/constants/map";
+import { CategoryT, ItemT, JobCategoryT, JobT } from "@/db/types";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -21,68 +26,77 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import Link from "next/link";
 import { useState } from "react";
 import { TableHeaderBtn } from "../buttons";
 
-type Props = {
-  data: ItemT[];
-  onEditItem: (item: ItemT) => void;
+type DataT = JobT & {
+  jobCategories: (JobCategoryT & {
+    category: CategoryT;
+  })[];
+  items: ItemT[];
 };
 
-const columns: ColumnDef<ItemT>[] = [
+const columns: ColumnDef<DataT>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <TableHeaderBtn column={column}>Name</TableHeaderBtn>
+      <TableHeaderBtn column={column}>Job Site Name</TableHeaderBtn>
     ),
     cell: ({ row }) => {
-      const item = row.original;
+      const job = row.original;
+      const firstCategory = job.jobCategories[0]?.category;
       return (
-        <div className="font-medium cursor-pointer hover:text-blue-600 hover:underline">
-          {item.name}
-        </div>
+        <Link
+          href={`/job/${job.id}/${firstCategory?.id}`}
+          className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
+        >
+          {job.name}
+        </Link>
       );
     },
   },
   {
-    accessorKey: "quantity",
+    accessorKey: "status",
     header: ({ column }) => (
-      <TableHeaderBtn column={column}>Quantity</TableHeaderBtn>
+      <TableHeaderBtn column={column}>Status</TableHeaderBtn>
     ),
     cell: ({ row }) => {
-      const quantity = row.getValue("quantity") as number;
+      const status = row.getValue("status") as JobT["status"];
       return (
-        <div className="cursor-pointer hover:text-blue-600">{quantity}</div>
+        <Badge className={JOB_SITE_STATUS_COLORS[status]}>
+          {JOB_SITE_STATUS_LABELS[status]}
+        </Badge>
       );
     },
   },
   {
-    accessorKey: "description",
+    accessorKey: "jobCategories",
     header: ({ column }) => (
-      <TableHeaderBtn column={column}>Description</TableHeaderBtn>
+      <TableHeaderBtn column={column}>Categories</TableHeaderBtn>
     ),
     cell: ({ row }) => {
-      const description = row.getValue("description") as string;
-      return (
-        <div className="cursor-pointer hover:text-blue-600">{description}</div>
-      );
+      const jobCategories = row.getValue("jobCategories") as JobCategoryT[];
+      return <div>{jobCategories.length}</div>;
     },
   },
   {
-    accessorKey: "notes",
+    accessorKey: "items",
     header: ({ column }) => (
-      <TableHeaderBtn column={column}>Notes</TableHeaderBtn>
+      <TableHeaderBtn column={column}>Items</TableHeaderBtn>
     ),
     cell: ({ row }) => {
-      const notes = row.getValue("notes") as string;
-      return (
-        <div className="cursor-pointer hover:text-blue-600">{notes || "-"}</div>
-      );
+      const items = row.getValue("items") as ItemT[];
+      return <div>{items.length}</div>;
     },
   },
 ];
 
-const InventoryTable = ({ data, onEditItem }: Props) => {
+type Props = {
+  data: DataT[];
+};
+
+const JobTable = ({ data }: Props) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -90,7 +104,7 @@ const InventoryTable = ({ data, onEditItem }: Props) => {
 
   const table = useReactTable({
     data,
-    columns,
+    columns: columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -135,10 +149,7 @@ const InventoryTable = ({ data, onEditItem }: Props) => {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-gray-50 cursor-pointer"
-                  onDoubleClick={() => {
-                    onEditItem(row.original);
-                  }}
+                  className="hover:bg-gray-50"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -157,7 +168,7 @@ const InventoryTable = ({ data, onEditItem }: Props) => {
                   className="h-24 text-center"
                 >
                   <div className="flex flex-col items-center justify-center space-y-3">
-                    <p className="text-gray-500 text-lg">No items found.</p>
+                    <p className="text-gray-500 text-lg">No job sites found.</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -169,4 +180,4 @@ const InventoryTable = ({ data, onEditItem }: Props) => {
   );
 };
 
-export { InventoryTable };
+export { JobTable };

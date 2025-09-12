@@ -1,51 +1,31 @@
-"use client";
-
-import { ItemModal } from "@/components/ItemModal";
-import { InventoryTable } from "@/components/tables";
+import { AddItemBtn } from "@/components/buttons";
+import { ItemTable } from "@/components/tables";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   JOB_SITE_STATUS_COLORS,
   JOB_SITE_STATUS_LABELS,
 } from "@/constants/map";
-import { CategoryT, ItemT, JobCategoryT, JobT } from "@/db/types";
-import { ArrowLeft, Plus } from "lucide-react";
+import { getJobAction } from "@/lib/actions";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { useState } from "react";
 
 type Props = {
-  job: JobT & {
-    jobCategories: (JobCategoryT & {
-      category: CategoryT & {
-        items: ItemT[];
-      };
-    })[];
-  };
-  categoryId: string;
+  params: Promise<{ id: string; categoryId: string }>;
 };
 
-const InventoryPage = ({ job, categoryId }: Props) => {
-  const [isItemModalOpen, setIsItemModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<ItemT | null>(null);
+const Page = async ({ params }: Props) => {
+  const { id, categoryId } = await params;
+  if (!id || !categoryId) return notFound();
+
+  const job = await getJobAction(id);
+
+  if (!job) return notFound();
 
   const categories = job.jobCategories.map((jc) => jc.category);
 
-  if (!categories.find((cat) => cat.id === categoryId)) {
-    notFound();
-  }
-
   const selectedCategory = categories.find((cat) => cat.id === categoryId);
-
-  const handleAddItem = () => {
-    setEditingItem(null);
-    setIsItemModalOpen(true);
-  };
-
-  const handleEditItem = (item: ItemT) => {
-    setEditingItem(item);
-    setIsItemModalOpen(true);
-  };
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -59,10 +39,7 @@ const InventoryPage = ({ job, categoryId }: Props) => {
             </Badge>
           </div>
         </div>
-        <Button onClick={handleAddItem}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Item
-        </Button>
+        <AddItemBtn />
       </div>
 
       {/* Main Content Layout */}
@@ -77,7 +54,7 @@ const InventoryPage = ({ job, categoryId }: Props) => {
               {categories.map((category) => (
                 <Link
                   key={category.id}
-                  href={`/inventory/${job.id}/${category.id}`}
+                  href={`/job/${job.id}/${category.id}`}
                   className={`w-full text-left p-3 rounded-lg mb-2 transition-colors block ${
                     categoryId === category.id
                       ? "bg-blue-50 border border-blue-200 text-blue-900"
@@ -94,7 +71,7 @@ const InventoryPage = ({ job, categoryId }: Props) => {
               ))}
             </div>
             <div className="p-4 border-t">
-              <Link href={`/jobsites/${job.status}`} className="w-full">
+              <Link href={`/job/list/${job.status}`} className="w-full">
                 <Button
                   variant="outline"
                   className="w-full flex items-center gap-2"
@@ -119,25 +96,13 @@ const InventoryPage = ({ job, categoryId }: Props) => {
               </p>
             </div>
             <div className="p-4 h-[calc(100%-80px)] overflow-auto">
-              <InventoryTable
-                data={selectedCategory?.items || []}
-                onEditItem={handleEditItem}
-              />
+              <ItemTable data={selectedCategory?.items || []} />
             </div>
           </div>
         </div>
       </div>
-
-      {/* Item Modal */}
-      <ItemModal
-        open={isItemModalOpen}
-        onOpenChange={setIsItemModalOpen}
-        jobId={job.id}
-        categoryId={categoryId}
-        item={editingItem}
-      />
     </div>
   );
 };
 
-export { InventoryPage };
+export default Page;

@@ -1,2 +1,2 @@
-export * from "./InventoryTable";
-export * from "./JobSitesTable";
+export * from "./item-table";
+export * from "./job-table";

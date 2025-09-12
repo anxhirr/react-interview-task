@@ -20,29 +20,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { ItemT } from "@/db/types";
 import { createItemAction, updateItemAction } from "@/lib/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  jobId: string;
-  categoryId: string;
   item: ItemT | null; // null for create, ItemT for update
 };
 
-const Component = ({ open, onOpenChange, jobId, categoryId, item }: Props) => {
+const ItemDialog = ({ open, onOpenChange, item }: Props) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
-        <Content
-          open={open}
-          onOpenChange={onOpenChange}
-          jobId={jobId}
-          categoryId={categoryId}
-          item={item}
-        />
+        <Content open={open} onOpenChange={onOpenChange} item={item} />
       </DialogContent>
     </Dialog>
   );
@@ -57,8 +49,12 @@ const schema = z.object({
 
 type SchemaT = z.infer<typeof schema>;
 
-const Content = ({ onOpenChange, jobId, categoryId, item }: Props) => {
+const Content = ({ onOpenChange, item }: Props) => {
   const router = useRouter();
+  const { id: jobId, categoryId } = useParams<{
+    id: string;
+    categoryId: string;
+  }>();
   const isEditing = !!item;
 
   const form = useForm<SchemaT>({
@@ -197,4 +193,4 @@ const Content = ({ onOpenChange, jobId, categoryId, item }: Props) => {
   );
 };
 
-export { Component as ItemModal };
+export { ItemDialog };

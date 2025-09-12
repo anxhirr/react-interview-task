@@ -1,4 +1,4 @@
-import { Providers } from "@/components/providers";
+import { QueryProvider } from "@/providers";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -28,7 +28,7 @@ const Layout = ({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>{children}</Providers>
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );
