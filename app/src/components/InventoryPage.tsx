@@ -1,5 +1,6 @@
 "use client";
 
+import { ItemModal } from "@/components/ItemModal";
 import { InventoryTable } from "@/components/tables";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { CategoryT, ItemT, JobCategoryT, JobT } from "@/db/types";
 import { ArrowLeft, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { useState } from "react";
 
 type Props = {
   job: JobT & {
@@ -24,6 +26,9 @@ type Props = {
 };
 
 const InventoryPage = ({ job, categoryId }: Props) => {
+  const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<ItemT | null>(null);
+
   const categories = job.jobCategories.map((jc) => jc.category);
 
   if (!categories.find((cat) => cat.id === categoryId)) {
@@ -31,6 +36,16 @@ const InventoryPage = ({ job, categoryId }: Props) => {
   }
 
   const selectedCategory = categories.find((cat) => cat.id === categoryId);
+
+  const handleAddItem = () => {
+    setEditingItem(null);
+    setIsItemModalOpen(true);
+  };
+
+  const handleEditItem = (item: ItemT) => {
+    setEditingItem(item);
+    setIsItemModalOpen(true);
+  };
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -44,7 +59,7 @@ const InventoryPage = ({ job, categoryId }: Props) => {
             </Badge>
           </div>
         </div>
-        <Button>
+        <Button onClick={handleAddItem}>
           <Plus className="h-4 w-4 mr-2" />
           Add Item
         </Button>
@@ -104,11 +119,23 @@ const InventoryPage = ({ job, categoryId }: Props) => {
               </p>
             </div>
             <div className="p-4 h-[calc(100%-80px)] overflow-auto">
-              <InventoryTable data={selectedCategory?.items || []} />
+              <InventoryTable
+                data={selectedCategory?.items || []}
+                onEditItem={handleEditItem}
+              />
             </div>
           </div>
         </div>
       </div>
+
+      {/* Item Modal */}
+      <ItemModal
+        open={isItemModalOpen}
+        onOpenChange={setIsItemModalOpen}
+        jobId={job.id}
+        categoryId={categoryId}
+        item={editingItem}
+      />
     </div>
   );
 };

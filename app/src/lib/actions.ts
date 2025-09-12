@@ -2,7 +2,7 @@
 
 import { db } from "@/db/instance";
 import { item, job, jobCategory } from "@/db/schema";
-import { JobT } from "@/db/types";
+import { ItemT, JobT } from "@/db/types";
 import { eq } from "drizzle-orm";
 
 const createJobAction = async (jobData: {
@@ -73,4 +73,19 @@ const getCategoriesAction = async () => {
   return data;
 };
 
-export { createJobAction, getCategoriesAction, getJobAction, getJobsAction };
+const createItemAction = async (data: Omit<ItemT, "id" | "createdAt">) =>
+  await db.insert(item).values(data).returning();
+
+const updateItemAction = async (
+  id: string,
+  data: Omit<ItemT, "id" | "createdAt" | "jobId" | "categoryId">
+) => await db.update(item).set(data).where(eq(item.id, id));
+
+export {
+  createItemAction,
+  createJobAction,
+  getCategoriesAction,
+  getJobAction,
+  getJobsAction,
+  updateItemAction,
+};

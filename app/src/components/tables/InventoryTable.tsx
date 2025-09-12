@@ -26,6 +26,7 @@ import { TableHeaderBtn } from "../buttons";
 
 type Props = {
   data: ItemT[];
+  onEditItem: (item: ItemT) => void;
 };
 
 const columns: ColumnDef<ItemT>[] = [
@@ -81,7 +82,7 @@ const columns: ColumnDef<ItemT>[] = [
   },
 ];
 
-const InventoryTable = ({ data }: Props) => {
+const InventoryTable = ({ data, onEditItem }: Props) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -136,7 +137,7 @@ const InventoryTable = ({ data }: Props) => {
                   data-state={row.getIsSelected() && "selected"}
                   className="hover:bg-gray-50 cursor-pointer"
                   onDoubleClick={() => {
-                    // TODO:
+                    onEditItem(row.original);
                   }}
                 >
                   {row.getVisibleCells().map((cell) => (
