@@ -13,7 +13,7 @@ import {
   JOB_SITE_STATUS_COLORS,
   JOB_SITE_STATUS_LABELS,
 } from "@/constants/map";
-import { JobSiteT } from "@/types";
+import { CategoryT, ItemT, JobCategoryT, JobT } from "@/db/types";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -30,20 +30,28 @@ import Link from "next/link";
 import { useState } from "react";
 import { TableHeaderBtn } from "../buttons";
 
-const columns: ColumnDef<JobSiteT>[] = [
+type DataT = JobT & {
+  jobCategories: (JobCategoryT & {
+    category: CategoryT;
+  })[];
+  items: ItemT[];
+};
+
+const columns: ColumnDef<DataT>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
       <TableHeaderBtn column={column}>Job Site Name</TableHeaderBtn>
     ),
     cell: ({ row }) => {
-      const jobSite = row.original;
+      const job = row.original;
+      const firstCategory = job.jobCategories[0]?.category;
       return (
         <Link
-          href={`/inventory/${jobSite.id}/${jobSite.categories[0].id}`}
+          href={`/inventory/${job.id}/${firstCategory?.id}`}
           className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
         >
-          {jobSite.name}
+          {job.name}
         </Link>
       );
     },
@@ -54,7 +62,7 @@ const columns: ColumnDef<JobSiteT>[] = [
       <TableHeaderBtn column={column}>Status</TableHeaderBtn>
     ),
     cell: ({ row }) => {
-      const status = row.getValue("status") as JobSiteT["status"];
+      const status = row.getValue("status") as JobT["status"];
       return (
         <Badge className={JOB_SITE_STATUS_COLORS[status]}>
           {JOB_SITE_STATUS_LABELS[status]}
@@ -62,10 +70,30 @@ const columns: ColumnDef<JobSiteT>[] = [
       );
     },
   },
+  {
+    accessorKey: "jobCategories",
+    header: ({ column }) => (
+      <TableHeaderBtn column={column}>Categories</TableHeaderBtn>
+    ),
+    cell: ({ row }) => {
+      const jobCategories = row.getValue("jobCategories") as JobCategoryT[];
+      return <div>{jobCategories.length}</div>;
+    },
+  },
+  {
+    accessorKey: "items",
+    header: ({ column }) => (
+      <TableHeaderBtn column={column}>Items</TableHeaderBtn>
+    ),
+    cell: ({ row }) => {
+      const items = row.getValue("items") as ItemT[];
+      return <div>{items.length}</div>;
+    },
+  },
 ];
 
 type Props = {
-  data: JobSiteT[];
+  data: DataT[];
 };
 
 const JobSitesTable = ({ data }: Props) => {

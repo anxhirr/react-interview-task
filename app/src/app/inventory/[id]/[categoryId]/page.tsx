@@ -1,4 +1,5 @@
 import { InventoryPage } from "@/components/InventoryPage";
+import { getJobAction } from "@/lib/actions";
 import { notFound } from "next/navigation";
 
 type Props = {
@@ -9,7 +10,11 @@ const Page = async ({ params }: Props) => {
   const { id, categoryId } = await params;
   if (!id || !categoryId) return notFound();
 
-  return <InventoryPage id={id} categoryId={categoryId} />;
+  const job = await getJobAction(id);
+
+  if (!job) return notFound();
+
+  return <InventoryPage job={job} categoryId={categoryId} />;
 };
 
 export default Page;

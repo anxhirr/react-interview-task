@@ -7,38 +7,40 @@ import {
   JOB_SITE_STATUS_COLORS,
   JOB_SITE_STATUS_LABELS,
 } from "@/constants/map";
-import { useApp } from "@/contexts/AppContext";
+import { CategoryT, ItemT, JobCategoryT, JobT } from "@/db/types";
 import { ArrowLeft, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 type Props = {
-  id: string;
+  job: JobT & {
+    jobCategories: (JobCategoryT & {
+      category: CategoryT & {
+        items: ItemT[];
+      };
+    })[];
+  };
   categoryId: string;
 };
 
-const InventoryPage = ({ id, categoryId }: Props) => {
-  const { jobSites } = useApp();
+const InventoryPage = ({ job, categoryId }: Props) => {
+  const categories = job.jobCategories.map((jc) => jc.category);
 
-  const jobSite = jobSites.find((site) => site.id === id);
-
-  if (!jobSite || !jobSite.categories.find((cat) => cat.id === categoryId)) {
+  if (!categories.find((cat) => cat.id === categoryId)) {
     notFound();
   }
 
-  const selectedCategory = jobSite?.categories.find(
-    (cat) => cat.id === categoryId
-  );
+  const selectedCategory = categories.find((cat) => cat.id === categoryId);
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold ">{jobSite.name}</h1>
+          <h1 className="text-3xl font-bold ">{job.name}</h1>
           <div className="flex items-center gap-2 mt-2">
             <span className="text-gray-600">Status:</span>
-            <Badge className={JOB_SITE_STATUS_COLORS[jobSite.status]}>
-              {JOB_SITE_STATUS_LABELS[jobSite.status]}
+            <Badge className={JOB_SITE_STATUS_COLORS[job.status]}>
+              {JOB_SITE_STATUS_LABELS[job.status]}
             </Badge>
           </div>
         </div>
@@ -57,10 +59,10 @@ const InventoryPage = ({ id, categoryId }: Props) => {
               <h2 className="text-lg font-semibold">Categories</h2>
             </div>
             <div className="p-2 flex-1 overflow-auto">
-              {jobSite.categories.map((category) => (
+              {categories.map((category) => (
                 <Link
                   key={category.id}
-                  href={`/inventory/${id}/${category.id}`}
+                  href={`/inventory/${job.id}/${category.id}`}
                   className={`w-full text-left p-3 rounded-lg mb-2 transition-colors block ${
                     categoryId === category.id
                       ? "bg-blue-50 border border-blue-200 text-blue-900"
@@ -77,7 +79,7 @@ const InventoryPage = ({ id, categoryId }: Props) => {
               ))}
             </div>
             <div className="p-4 border-t">
-              <Link href={`/jobsites/${jobSite.status}`} className="w-full">
+              <Link href={`/jobsites/${job.status}`} className="w-full">
                 <Button
                   variant="outline"
                   className="w-full flex items-center gap-2"

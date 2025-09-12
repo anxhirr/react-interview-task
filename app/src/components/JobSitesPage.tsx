@@ -2,8 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useApp } from "@/contexts/AppContext";
-import { JobSiteT } from "@/types";
+import { CategoryT, ItemT, JobCategoryT, JobT } from "@/db/types";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -11,19 +10,22 @@ import { CreateJobSiteModal } from "./CreateJobSiteModal";
 import { JobSitesTable } from "./tables";
 
 type Props = {
-  status: JobSiteT["status"];
+  status: JobT["status"];
+  data: (JobT & {
+    jobCategories: (JobCategoryT & {
+      category: CategoryT;
+    })[];
+    items: ItemT[];
+  })[];
 };
 
-const JobSitesPage = ({ status }: Props) => {
+const JobSitesPage = ({ status, data }: Props) => {
   const router = useRouter();
-  const { jobSites } = useApp();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const handleTabChange = (value: string) => {
     router.push(`/jobsites/${value}`);
   };
-
-  const filteredData = jobSites.filter((jobSite) => jobSite.status === status);
 
   return (
     <>
@@ -61,13 +63,13 @@ const JobSitesPage = ({ status }: Props) => {
           </TabsList>
 
           <TabsContent value="in_progress" className="mt-6">
-            <JobSitesTable data={filteredData} />
+            <JobSitesTable data={data} />
           </TabsContent>
           <TabsContent value="on_hold" className="mt-6">
-            <JobSitesTable data={filteredData} />
+            <JobSitesTable data={data} />
           </TabsContent>
           <TabsContent value="completed" className="mt-6">
-            <JobSitesTable data={filteredData} />
+            <JobSitesTable data={data} />
           </TabsContent>
         </Tabs>
       </div>

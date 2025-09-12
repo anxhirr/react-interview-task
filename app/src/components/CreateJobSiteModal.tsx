@@ -30,236 +30,236 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useApp } from "@/contexts/AppContext";
+import { JobT } from "@/db/types";
+import { createJobAction, getCategoriesAction } from "@/lib/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronDown, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
-
-const schema = z.object({
-  name: z
-    .string()
-    .min(1, "Job site name is required")
-    .max(100, "Name must be less than 100 characters"),
-  status: z.enum(["in_progress", "on_hold", "completed"]),
-  categories: z
-    .array(z.enum(["Sidewalk Shed", "Scaffold", "Shoring"]))
-    .min(1, "At least one category is required"),
-});
-
-type SchemaT = z.infer<typeof schema>;
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export function CreateJobSiteModal({ open, onOpenChange }: Props) {
-  const { addJobSite } = useApp();
+const Component = ({ open, onOpenChange }: Props) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <Content open={open} onOpenChange={onOpenChange} />
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const schema = z.object({
+  name: z
+    .string()
+    .min(1, "Job site name is required")
+    .max(100, "Name must be less than 100 characters"),
+  status: z.custom<JobT["status"]>(),
+  categoryIds: z.array(z.string()).min(1, "At least one category is required"),
+});
+
+type SchemaT = z.infer<typeof schema>;
+
+const Content = ({ onOpenChange }: Props) => {
+  const router = useRouter();
+
+  const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategoriesAction,
+  });
 
   const form = useForm<SchemaT>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
       status: "in_progress",
-      categories: ["Scaffold"],
+      categoryIds: [],
     },
   });
 
-  const watchedCategories = useWatch({
+  const formCategoryIds = useWatch({
     control: form.control,
-    name: "categories",
+    name: "categoryIds",
   });
 
-  const onSubmit = (data: SchemaT) => {
-    const jobSiteData = {
-      name: data.name.trim(),
-      status: data.status,
-      categories: data.categories.map((categoryName, index) => ({
-        id: `cat-${Date.now()}-${index}`,
-        name: categoryName,
-        items: [],
-      })),
-    };
+  const onSubmit = async (data: SchemaT) => {
+    try {
+      await createJobAction(data);
 
-    addJobSite(jobSiteData);
-
-    // Reset form
-    form.reset({
-      name: "",
-      status: "in_progress",
-      categories: ["Sidewalk Shed", "Scaffold", "Shoring"],
-    });
-    onOpenChange(false);
-  };
-
-  const addCategory = (
-    categoryToAdd: "Sidewalk Shed" | "Scaffold" | "Shoring"
-  ) => {
-    const currentCategories = form.getValues("categories");
-    if (!currentCategories.includes(categoryToAdd)) {
-      form.setValue("categories", [...currentCategories, categoryToAdd]);
+      onOpenChange(false);
+      router.refresh();
+    } catch (error) {
+      console.error("Error creating job site:", error);
+      // TODO: show a toast
     }
   };
 
-  const removeCategory = (
-    categoryToRemove: "Sidewalk Shed" | "Scaffold" | "Shoring"
-  ) => {
-    const currentCategories = form.getValues("categories");
+  const addCategory = (categoryIdToAdd: string) => {
+    const currentCategories = form.getValues("categoryIds");
+    if (!currentCategories.includes(categoryIdToAdd)) {
+      form.setValue("categoryIds", [...currentCategories, categoryIdToAdd]);
+    }
+  };
+
+  const removeCategory = (categoryIdToRemove: string) => {
+    const currentCategories = form.getValues("categoryIds");
     form.setValue(
-      "categories",
-      currentCategories.filter((cat) => cat !== categoryToRemove)
+      "categoryIds",
+      currentCategories.filter((cat) => cat !== categoryIdToRemove)
     );
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Create New Job Site</DialogTitle>
-        </DialogHeader>
+    <>
+      <DialogHeader>
+        <DialogTitle>Create New Job Site</DialogTitle>
+      </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name *</FormLabel>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name *</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter job site name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
-                    <Input placeholder="Enter job site name" {...field} />
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                  <SelectContent>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="on_hold">On Hold</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="in_progress">In Progress</SelectItem>
-                      <SelectItem value="on_hold">On Hold</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="categoryIds"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Categories</FormLabel>
+                <FormControl>
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-between h-10 px-3 py-2 text-sm"
+                          >
+                            Select a category to add
+                            <ChevronDown className="h-4 w-4 opacity-50" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-full min-w-[200px]">
+                          {isLoadingCategories ? (
+                            <DropdownMenuItem disabled>
+                              <span>Loading categories...</span>
+                            </DropdownMenuItem>
+                          ) : categories.length === 0 ? (
+                            <DropdownMenuItem disabled>
+                              <span>No categories available</span>
+                            </DropdownMenuItem>
+                          ) : (
+                            categories.map((category) => (
+                              <DropdownMenuItem
+                                key={category.id}
+                                onClick={() => addCategory(category.id)}
+                                className="flex items-center justify-between"
+                              >
+                                <span>{category.name}</span>
+                                {formCategoryIds.includes(category.id) && (
+                                  <Check className="h-4 w-4 text-green-600" />
+                                )}
+                              </DropdownMenuItem>
+                            ))
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
 
-            <FormField
-              control={form.control}
-              name="categories"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Categories</FormLabel>
-                  <FormControl>
-                    <div className="space-y-3">
-                      <div className="flex gap-2">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className="w-full justify-between h-10 px-3 py-2 text-sm"
-                            >
-                              Select a category to add
-                              <ChevronDown className="h-4 w-4 opacity-50" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-full min-w-[200px]">
-                            <DropdownMenuItem
-                              onClick={() => addCategory("Sidewalk Shed")}
-                              className="flex items-center justify-between"
-                            >
-                              <span>Sidewalk Shed</span>
-                              {watchedCategories.includes("Sidewalk Shed") && (
-                                <Check className="h-4 w-4 text-green-600" />
-                              )}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => addCategory("Scaffold")}
-                              className="flex items-center justify-between"
-                            >
-                              <span>Scaffold</span>
-                              {watchedCategories.includes("Scaffold") && (
-                                <Check className="h-4 w-4 text-green-600" />
-                              )}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => addCategory("Shoring")}
-                              className="flex items-center justify-between"
-                            >
-                              <span>Shoring</span>
-                              {watchedCategories.includes("Shoring") && (
-                                <Check className="h-4 w-4 text-green-600" />
-                              )}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2">
-                        {watchedCategories.map((category) => (
+                    <div className="flex flex-wrap gap-2">
+                      {formCategoryIds.map((categoryId) => {
+                        const category = categories.find(
+                          (cat) => cat.id === categoryId
+                        );
+                        return (
                           <Badge
-                            key={category}
+                            key={categoryId}
                             variant="secondary"
                             className="flex items-center gap-1 px-2 py-1"
                           >
-                            {category}
+                            {category?.name || "Unknown"}
                             <button
                               type="button"
-                              onClick={() => removeCategory(category)}
+                              onClick={() => removeCategory(categoryId)}
                               className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
                             >
                               <X className="h-3 w-3" />
                             </button>
                           </Badge>
-                        ))}
-                      </div>
-
-                      {watchedCategories.length === 0 && (
-                        <p className="text-sm text-gray-500">
-                          Add at least one category to organize your inventory.
-                        </p>
-                      )}
+                        );
+                      })}
                     </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <div className="flex justify-end gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting
-                  ? "Creating..."
-                  : "Create Job Site"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+                    {formCategoryIds.length === 0 && (
+                      <p className="text-sm text-gray-500">
+                        Add at least one category to organize your inventory.
+                      </p>
+                    )}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex justify-end gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? "Creating..." : "Create Job Site"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
   );
-}
+};
+
+export { Component as CreateJobSiteModal };

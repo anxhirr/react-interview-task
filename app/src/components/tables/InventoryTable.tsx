@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { InventoryItemT } from "@/types";
+import { ItemT } from "@/db/types";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -25,10 +25,10 @@ import { useState } from "react";
 import { TableHeaderBtn } from "../buttons";
 
 type Props = {
-  data: InventoryItemT[];
+  data: ItemT[];
 };
 
-const columns: ColumnDef<InventoryItemT>[] = [
+const columns: ColumnDef<ItemT>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
