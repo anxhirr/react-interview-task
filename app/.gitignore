@@ -30,8 +30,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# ENV FILE IS PUBLICLY EXPOSED FOR DEMO PURPOSES
+# # env files (can opt-in for committing if needed)
+# .env*
 
 # vercel
 .vercel
