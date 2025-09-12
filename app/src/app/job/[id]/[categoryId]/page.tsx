@@ -1,22 +1,26 @@
+import { getItemsAction, getJobAction } from "@/actions";
 import { AddItemBtn } from "@/components/buttons";
 import { ItemTable } from "@/components/tables";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DEFAULT_LIMIT, DEFAULT_PAGE } from "@/constants/defaults";
 import {
   JOB_SITE_STATUS_COLORS,
   JOB_SITE_STATUS_LABELS,
 } from "@/constants/map";
-import { getJobAction } from "@/lib/actions";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 type Props = {
   params: Promise<{ id: string; categoryId: string }>;
+  searchParams: Promise<{ page?: string; limit?: string }>;
 };
 
-const Page = async ({ params }: Props) => {
+const Page = async ({ params, searchParams }: Props) => {
   const { id, categoryId } = await params;
+  const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT } = await searchParams;
+
   if (!id || !categoryId) return notFound();
 
   const job = await getJobAction(id);
@@ -24,8 +28,15 @@ const Page = async ({ params }: Props) => {
   if (!job) return notFound();
 
   const categories = job.jobCategories.map((jc) => jc.category);
-
   const selectedCategory = categories.find((cat) => cat.id === categoryId);
+
+  const itemsResult = await getItemsAction(
+    { categoryId, jobId: id },
+    {
+      page: Number(page),
+      limit: Number(limit),
+    }
+  );
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -64,7 +75,9 @@ const Page = async ({ params }: Props) => {
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{category.name}</span>
                     <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
-                      {category.items.length}
+                      {category.id === categoryId
+                        ? itemsResult.pagination.total
+                        : category.items.length}
                     </span>
                   </div>
                 </Link>
@@ -96,7 +109,10 @@ const Page = async ({ params }: Props) => {
               </p>
             </div>
             <div className="p-4 h-[calc(100%-80px)] overflow-auto">
-              <ItemTable data={selectedCategory?.items || []} />
+              <ItemTable
+                data={itemsResult.data}
+                pagination={itemsResult.pagination}
+              />
             </div>
           </div>
         </div>

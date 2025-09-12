@@ -2,8 +2,9 @@
 
 import { db } from "@/db/instance";
 import { item, job, jobCategory } from "@/db/schema";
-import { ItemT, JobT } from "@/db/types";
-import { eq } from "drizzle-orm";
+import { JobT } from "@/db/types";
+import { count, desc, eq } from "drizzle-orm";
+import { JobsActionT } from "./types";
 
 const createJobAction = async (jobData: {
   name: string;
@@ -49,8 +50,21 @@ const getJobAction = async (jobId: string) => {
   return data;
 };
 
-const getJobsAction = async (status: JobT["status"]) => {
-  const now = Date.now();
+const getJobsAction = async (
+  status: JobT["status"],
+  params: PaginationParamsT
+): Promise<JobsActionT> => {
+  const { page, limit } = params;
+  const offset = (page - 1) * limit;
+
+  const [totalResult] = await db
+    .select({ count: count() })
+    .from(job)
+    .where(eq(job.status, status));
+
+  const total = totalResult.count;
+  const totalPages = Math.ceil(total / limit);
+
   const data = await db.query.job.findMany({
     where: eq(job.status, status),
     with: {
@@ -61,31 +75,22 @@ const getJobsAction = async (status: JobT["status"]) => {
       },
       items: true,
     },
+    orderBy: [desc(job.createdAt)],
+    limit,
+    offset,
   });
-  console.log(`getJobsAction: ${status} took ${Date.now() - now}ms`);
-  return data;
+
+  return {
+    data,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
+    },
+  };
 };
 
-const getCategoriesAction = async () => {
-  const data = await db.query.category.findMany({
-    orderBy: (categories, { asc }) => [asc(categories.name)],
-  });
-  return data;
-};
-
-const createItemAction = async (data: Omit<ItemT, "id" | "createdAt">) =>
-  await db.insert(item).values(data).returning();
-
-const updateItemAction = async (
-  id: string,
-  data: Omit<ItemT, "id" | "createdAt" | "jobId" | "categoryId">
-) => await db.update(item).set(data).where(eq(item.id, id));
-
-export {
-  createItemAction,
-  createJobAction,
-  getCategoriesAction,
-  getJobAction,
-  getJobsAction,
-  updateItemAction,
-};
+export { createJobAction, getJobAction, getJobsAction };

@@ -1,23 +1,29 @@
+import { getJobsAction } from "@/actions";
 import { AddJobBtn } from "@/components/buttons";
 import { JobTable } from "@/components/tables";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DEFAULT_LIMIT, DEFAULT_PAGE } from "@/constants/defaults";
 import { JobT } from "@/db/types";
-import { getJobsAction } from "@/lib/actions";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 type Props = {
   params: Promise<{ status: JobT["status"] }>;
+  searchParams: Promise<{ page?: string; limit?: string }>;
 };
 
 const validStatuses: JobT["status"][] = ["in_progress", "on_hold", "completed"];
 
-const Page = async ({ params }: Props) => {
+const Page = async ({ params, searchParams }: Props) => {
   const { status } = await params;
+  const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT } = await searchParams;
 
   if (!validStatuses.includes(status)) return notFound();
 
-  const jobs = await getJobsAction(status);
+  const { data, pagination } = await getJobsAction(status, {
+    page: Number(page),
+    limit: Number(limit),
+  });
 
   return (
     <>
@@ -58,13 +64,13 @@ const Page = async ({ params }: Props) => {
           </TabsList>
 
           <TabsContent value="in_progress" className="mt-6">
-            <JobTable data={jobs} />
+            <JobTable data={data} pagination={pagination} />
           </TabsContent>
           <TabsContent value="on_hold" className="mt-6">
-            <JobTable data={jobs} />
+            <JobTable data={data} pagination={pagination} />
           </TabsContent>
           <TabsContent value="completed" className="mt-6">
-            <JobTable data={jobs} />
+            <JobTable data={data} pagination={pagination} />
           </TabsContent>
         </Tabs>
       </div>
