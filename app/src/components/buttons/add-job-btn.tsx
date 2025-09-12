@@ -15,8 +15,8 @@ const AddJobBtn = () => {
   return (
     <>
       <Button onClick={onClick}>
-        <Plus />
         Add Job
+        <Plus />
       </Button>
 
       <JobDialog open={open} onOpenChange={setOpen} />

@@ -1,21 +1,13 @@
 "use client";
 
-import { createJobAction, getCategoriesAction } from "@/actions";
+import { createJobAction } from "@/actions";
 import { DialogActions } from "@/components/dialogs/dialog-actions";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Form,
   FormControl,
@@ -27,12 +19,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { JobT } from "@/db/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
-import { Check, ChevronDown, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { StatusSelect } from "../selects";
+import { CategorySelect, StatusSelect } from "../selects";
 
 type Props = {
   open: boolean;
@@ -64,11 +54,6 @@ const Content = ({ onOpenChange }: Props) => {
   const router = useRouter();
   const { status } = useParams<{ status: JobT["status"] }>();
 
-  const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: getCategoriesAction,
-  });
-
   const form = useForm<SchemaT>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -76,11 +61,6 @@ const Content = ({ onOpenChange }: Props) => {
       status,
       categoryIds: [],
     },
-  });
-
-  const formCategoryIds = useWatch({
-    control: form.control,
-    name: "categoryIds",
   });
 
   const onSubmit = async (data: SchemaT) => {
@@ -93,26 +73,6 @@ const Content = ({ onOpenChange }: Props) => {
       console.error("Error creating job site:", error);
       // TODO: show a toast
     }
-  };
-
-  const addCategory = (categoryIdToAdd: string) => {
-    const currentCategories = form.getValues("categoryIds");
-    if (!currentCategories.includes(categoryIdToAdd)) {
-      form.setValue("categoryIds", [...currentCategories, categoryIdToAdd], {
-        shouldValidate: true,
-      });
-    }
-  };
-
-  const removeCategory = (categoryIdToRemove: string) => {
-    const currentCategories = form.getValues("categoryIds");
-    form.setValue(
-      "categoryIds",
-      currentCategories.filter((cat) => cat !== categoryIdToRemove),
-      {
-        shouldValidate: true,
-      }
-    );
   };
 
   return (
@@ -159,75 +119,11 @@ const Content = ({ onOpenChange }: Props) => {
               <FormItem>
                 <FormLabel>Categories</FormLabel>
                 <FormControl>
-                  <div className="space-y-3">
-                    <div className="flex gap-2">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-between h-10 px-3 py-2 text-sm"
-                          >
-                            Select a category to add
-                            <ChevronDown className=" opacity-50" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-full min-w-[200px]">
-                          {isLoadingCategories ? (
-                            <DropdownMenuItem disabled>
-                              <span>Loading categories...</span>
-                            </DropdownMenuItem>
-                          ) : categories.length === 0 ? (
-                            <DropdownMenuItem disabled>
-                              <span>No categories available</span>
-                            </DropdownMenuItem>
-                          ) : (
-                            categories.map((category) => (
-                              <DropdownMenuItem
-                                key={category.id}
-                                onClick={() => addCategory(category.id)}
-                                className="flex items-center justify-between"
-                              >
-                                <span>{category.name}</span>
-                                {formCategoryIds.includes(category.id) && (
-                                  <Check className=" text-green-600" />
-                                )}
-                              </DropdownMenuItem>
-                            ))
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      {formCategoryIds.map((categoryId) => {
-                        const category = categories.find(
-                          (cat) => cat.id === categoryId
-                        );
-                        return (
-                          <Badge
-                            key={categoryId}
-                            variant="secondary"
-                            className="flex items-center gap-1 px-2 py-1"
-                          >
-                            {category?.name || "Unknown"}
-                            <button
-                              type="button"
-                              onClick={() => removeCategory(categoryId)}
-                              className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        );
-                      })}
-                    </div>
-
-                    {formCategoryIds.length === 0 && (
-                      <p className="text-sm text-gray-500">
-                        Add at least one category to organize your inventory.
-                      </p>
-                    )}
-                  </div>
+                  <CategorySelect
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    placeholder="Select a category to add"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

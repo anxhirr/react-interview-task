@@ -13,6 +13,13 @@ type Props = {
 
 const columns: ColumnDef<ItemT>[] = [
   {
+    accessorKey: "id",
+    header: "Nr.",
+    cell: ({ row }) => {
+      return row.index + 1;
+    },
+  },
+  {
     accessorKey: "name",
     header: "Name",
     cell: ({ row }) => {

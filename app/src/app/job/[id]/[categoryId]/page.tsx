@@ -93,10 +93,10 @@ const Page = async ({ params, searchParams }: Props) => {
               <Link href={`/job/list/${job.status}`} className="w-full">
                 <Button
                   variant="outline"
-                  className="w-full flex items-center gap-2"
+                  className="w-full flex items-center gap-2 bg-[#1264A3] text-white hover:bg-[#1264A3]/90 hover:text-white"
                 >
-                  <ArrowLeft />
                   Back to Job Sites
+                  <ArrowLeft />
                 </Button>
               </Link>
             </div>

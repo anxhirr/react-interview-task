@@ -12,8 +12,8 @@ const NotFoundComponent = () => {
         </p>
         <Link href="/job/list/in_progress">
           <Button>
-            <ArrowLeft />
             Back to Job Sites
+            <ArrowLeft />
           </Button>
         </Link>
       </div>

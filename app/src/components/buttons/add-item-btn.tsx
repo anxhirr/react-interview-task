@@ -15,8 +15,8 @@ const AddItemBtn = () => {
   return (
     <>
       <Button onClick={onClick}>
-        <Plus />
         Add Item
+        <Plus />
       </Button>
 
       <ItemDialog

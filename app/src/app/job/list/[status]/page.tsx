@@ -2,9 +2,11 @@ import { getJobsAction } from "@/actions";
 import { AddJobBtn } from "@/components/buttons";
 import { JobTable } from "@/components/tables";
 import { SearchInput } from "@/components/ui/search-input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DEFAULT_LIMIT, DEFAULT_PAGE } from "@/constants/defaults";
+import { JOB_SITE_STATUS_LABELS } from "@/constants/map";
 import { JobT } from "@/db/types";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -14,6 +16,34 @@ type Props = {
 };
 
 const validStatuses: JobT["status"][] = ["in_progress", "on_hold", "completed"];
+
+const tabsConfig: {
+  value: JobT["status"];
+  activeClassName: string;
+  inactiveClassName: string;
+}[] = [
+  {
+    value: "in_progress",
+    activeClassName:
+      "data-[state=active]:bg-yellow-500 data-[state=active]:text-white",
+    inactiveClassName:
+      "data-[state=inactive]:text-yellow-700 data-[state=inactive]:hover:bg-yellow-100",
+  },
+  {
+    value: "on_hold",
+    activeClassName:
+      "data-[state=active]:bg-red-500 data-[state=active]:text-white",
+    inactiveClassName:
+      "data-[state=inactive]:text-red-700 data-[state=inactive]:hover:bg-red-100",
+  },
+  {
+    value: "completed",
+    activeClassName:
+      "data-[state=active]:bg-green-500 data-[state=active]:text-white",
+    inactiveClassName:
+      "data-[state=inactive]:text-green-700 data-[state=inactive]:hover:bg-green-100",
+  },
+] as const;
 
 const Page = async ({ params, searchParams }: Props) => {
   const { status } = await params;
@@ -45,48 +75,34 @@ const Page = async ({ params, searchParams }: Props) => {
         </div>
 
         <Tabs value={status} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger
-              value="in_progress"
-              className="flex items-center gap-2"
-              asChild
-            >
-              <Link href="/job/list/in_progress">In Progress</Link>
-            </TabsTrigger>
-            <TabsTrigger
-              value="on_hold"
-              className="flex items-center gap-2"
-              asChild
-            >
-              <Link href="/job/list/on_hold">On Hold</Link>
-            </TabsTrigger>
-            <TabsTrigger
-              value="completed"
-              className="flex items-center gap-2"
-              asChild
-            >
-              <Link href="/job/list/completed">Completed</Link>
-            </TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 h-14 p-1">
+            {tabsConfig.map((tab) => {
+              return (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className={cn(
+                    "text-base",
+                    tab.activeClassName,
+                    tab.inactiveClassName
+                  )}
+                  asChild
+                >
+                  <Link href={`/job/list/${tab.value}`}>
+                    {JOB_SITE_STATUS_LABELS[tab.value]}
+                  </Link>
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
-
-          {/* Search Input */}
-          <div className="mt-6 mb-4">
-            <SearchInput
-              placeholder="Search job sites by name..."
-              className="max-w-md"
-            />
-          </div>
-
-          <TabsContent value="in_progress" className="mt-6">
-            <JobTable data={data} pagination={pagination} />
-          </TabsContent>
-          <TabsContent value="on_hold" className="mt-6">
-            <JobTable data={data} pagination={pagination} />
-          </TabsContent>
-          <TabsContent value="completed" className="mt-6">
-            <JobTable data={data} pagination={pagination} />
-          </TabsContent>
         </Tabs>
+        <div className="my-4">
+          <SearchInput
+            placeholder="Search job sites by name..."
+            className="max-w-md"
+          />
+        </div>
+        <JobTable data={data} pagination={pagination} />
       </div>
     </>
   );
