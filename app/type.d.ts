@@ -7,7 +7,8 @@ type PaginationT = {
   hasPrev: boolean;
 };
 
-type PaginationParamsT = {
+type QueryParamsT = {
   page: number;
   limit: number;
+  search?: string;
 };

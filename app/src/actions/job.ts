@@ -3,7 +3,7 @@
 import { db } from "@/db/instance";
 import { item, job, jobCategory } from "@/db/schema";
 import { JobT } from "@/db/types";
-import { count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, ilike } from "drizzle-orm";
 import { JobsActionT } from "./types";
 
 const createJobAction = async (jobData: {
@@ -52,21 +52,26 @@ const getJobAction = async (jobId: string) => {
 
 const getJobsAction = async (
   status: JobT["status"],
-  params: PaginationParamsT
+  params: QueryParamsT
 ): Promise<JobsActionT> => {
-  const { page, limit } = params;
+  const { page, limit, search } = params;
   const offset = (page - 1) * limit;
+
+  const whereQuery = and(
+    eq(job.status, status),
+    ...(search ? [ilike(job.name, `%${search}%`)] : [])
+  );
 
   const [totalResult] = await db
     .select({ count: count() })
     .from(job)
-    .where(eq(job.status, status));
+    .where(whereQuery);
 
   const total = totalResult.count;
   const totalPages = Math.ceil(total / limit);
 
   const data = await db.query.job.findMany({
-    where: eq(job.status, status),
+    where: whereQuery,
     with: {
       jobCategories: {
         with: {

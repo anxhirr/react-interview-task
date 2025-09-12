@@ -3,6 +3,7 @@ import { AddItemBtn } from "@/components/buttons";
 import { ItemTable } from "@/components/tables";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SearchInput } from "@/components/ui/search-input";
 import { DEFAULT_LIMIT, DEFAULT_PAGE } from "@/constants/defaults";
 import {
   JOB_SITE_STATUS_COLORS,
@@ -14,12 +15,16 @@ import { notFound } from "next/navigation";
 
 type Props = {
   params: Promise<{ id: string; categoryId: string }>;
-  searchParams: Promise<{ page?: string; limit?: string }>;
+  searchParams: Promise<{ page?: string; limit?: string; search?: string }>;
 };
 
 const Page = async ({ params, searchParams }: Props) => {
   const { id, categoryId } = await params;
-  const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT } = await searchParams;
+  const {
+    page = DEFAULT_PAGE,
+    limit = DEFAULT_LIMIT,
+    search,
+  } = await searchParams;
 
   if (!id || !categoryId) return notFound();
 
@@ -35,6 +40,7 @@ const Page = async ({ params, searchParams }: Props) => {
     {
       page: Number(page),
       limit: Number(limit),
+      search,
     }
   );
 
@@ -108,7 +114,13 @@ const Page = async ({ params, searchParams }: Props) => {
                 Double-click on any row to edit the item
               </p>
             </div>
-            <div className="p-4 h-[calc(100%-80px)] overflow-auto">
+            <div className="p-4">
+              <SearchInput
+                placeholder="Search items by name, description, or notes..."
+                className="mb-4"
+              />
+            </div>
+            <div className="px-4 pb-4 h-[calc(100%-140px)] overflow-auto">
               <ItemTable
                 data={itemsResult.data}
                 pagination={itemsResult.pagination}

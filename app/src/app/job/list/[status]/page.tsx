@@ -1,6 +1,7 @@
 import { getJobsAction } from "@/actions";
 import { AddJobBtn } from "@/components/buttons";
 import { JobTable } from "@/components/tables";
+import { SearchInput } from "@/components/ui/search-input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DEFAULT_LIMIT, DEFAULT_PAGE } from "@/constants/defaults";
 import { JobT } from "@/db/types";
@@ -9,20 +10,25 @@ import { notFound } from "next/navigation";
 
 type Props = {
   params: Promise<{ status: JobT["status"] }>;
-  searchParams: Promise<{ page?: string; limit?: string }>;
+  searchParams: Promise<{ page?: string; limit?: string; search?: string }>;
 };
 
 const validStatuses: JobT["status"][] = ["in_progress", "on_hold", "completed"];
 
 const Page = async ({ params, searchParams }: Props) => {
   const { status } = await params;
-  const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT } = await searchParams;
+  const {
+    page = DEFAULT_PAGE,
+    limit = DEFAULT_LIMIT,
+    search,
+  } = await searchParams;
 
   if (!validStatuses.includes(status)) return notFound();
 
   const { data, pagination } = await getJobsAction(status, {
     page: Number(page),
     limit: Number(limit),
+    search,
   });
 
   return (
@@ -62,6 +68,14 @@ const Page = async ({ params, searchParams }: Props) => {
               <Link href="/job/list/completed">Completed</Link>
             </TabsTrigger>
           </TabsList>
+
+          {/* Search Input */}
+          <div className="mt-6 mb-4">
+            <SearchInput
+              placeholder="Search job sites by name..."
+              className="max-w-md"
+            />
+          </div>
 
           <TabsContent value="in_progress" className="mt-6">
             <JobTable data={data} pagination={pagination} />

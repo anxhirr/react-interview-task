@@ -3,7 +3,7 @@
 import { db } from "@/db/instance";
 import { item } from "@/db/schema";
 import { ItemT } from "@/db/types";
-import { and, count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, ilike, or } from "drizzle-orm";
 
 const createItemAction = async (data: Omit<ItemT, "id" | "createdAt">) =>
   await db.insert(item).values(data).returning();
@@ -15,14 +15,23 @@ const updateItemAction = async (
 
 const getItemsAction = async (
   { categoryId, jobId }: { categoryId: string; jobId: string },
-  params: PaginationParamsT
+  params: QueryParamsT
 ): Promise<{ data: ItemT[]; pagination: PaginationT }> => {
-  const { page, limit } = params;
+  const { page, limit, search } = params;
   const offset = (page - 1) * limit;
 
   const whereQuery = and(
     eq(item.categoryId, categoryId),
-    eq(item.jobId, jobId)
+    eq(item.jobId, jobId),
+    ...(search
+      ? [
+          or(
+            ilike(item.name, `%${search}%`),
+            ilike(item.description, `%${search}%`),
+            ilike(item.notes, `%${search}%`)
+          ),
+        ]
+      : [])
   );
 
   const [data, [totalResult]] = await Promise.all([
