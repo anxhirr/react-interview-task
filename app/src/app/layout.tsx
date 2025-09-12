@@ -18,11 +18,11 @@ export const metadata: Metadata = {
   description: "Flex Business Solutions - Job Site Inventory Management",
 };
 
-export default function RootLayout({
+const Layout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) => {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -32,4 +32,6 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+};
+
+export default Layout;

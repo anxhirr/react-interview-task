@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -9,11 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  JOB_SITE_STATUS_COLORS,
-  JOB_SITE_STATUS_LABELS,
-} from "@/constants/map";
-import { JobSiteT } from "@/types";
+import { InventoryItemT } from "@/types";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -26,49 +21,67 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import Link from "next/link";
 import { useState } from "react";
 import { TableHeaderBtn } from "../buttons";
 
-const columns: ColumnDef<JobSiteT>[] = [
+type Props = {
+  data: InventoryItemT[];
+};
+
+const columns: ColumnDef<InventoryItemT>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <TableHeaderBtn column={column}>Job Site Name</TableHeaderBtn>
+      <TableHeaderBtn column={column}>Name</TableHeaderBtn>
     ),
     cell: ({ row }) => {
-      const jobSite = row.original;
+      const item = row.original;
       return (
-        <Link
-          href={`/inventory/${jobSite.id}/${jobSite.categories[0].id}`}
-          className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
-        >
-          {jobSite.name}
-        </Link>
+        <div className="font-medium cursor-pointer hover:text-blue-600 hover:underline">
+          {item.name}
+        </div>
       );
     },
   },
   {
-    accessorKey: "status",
+    accessorKey: "quantity",
     header: ({ column }) => (
-      <TableHeaderBtn column={column}>Status</TableHeaderBtn>
+      <TableHeaderBtn column={column}>Quantity</TableHeaderBtn>
     ),
     cell: ({ row }) => {
-      const status = row.getValue("status") as JobSiteT["status"];
+      const quantity = row.getValue("quantity") as number;
       return (
-        <Badge className={JOB_SITE_STATUS_COLORS[status]}>
-          {JOB_SITE_STATUS_LABELS[status]}
-        </Badge>
+        <div className="cursor-pointer hover:text-blue-600">{quantity}</div>
+      );
+    },
+  },
+  {
+    accessorKey: "description",
+    header: ({ column }) => (
+      <TableHeaderBtn column={column}>Description</TableHeaderBtn>
+    ),
+    cell: ({ row }) => {
+      const description = row.getValue("description") as string;
+      return (
+        <div className="cursor-pointer hover:text-blue-600">{description}</div>
+      );
+    },
+  },
+  {
+    accessorKey: "notes",
+    header: ({ column }) => (
+      <TableHeaderBtn column={column}>Notes</TableHeaderBtn>
+    ),
+    cell: ({ row }) => {
+      const notes = row.getValue("notes") as string;
+      return (
+        <div className="cursor-pointer hover:text-blue-600">{notes || "-"}</div>
       );
     },
   },
 ];
 
-type Props = {
-  data: JobSiteT[];
-};
-
-const JobSitesTable = ({ data }: Props) => {
+const InventoryTable = ({ data }: Props) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -76,7 +89,7 @@ const JobSitesTable = ({ data }: Props) => {
 
   const table = useReactTable({
     data,
-    columns: columns,
+    columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -121,7 +134,10 @@ const JobSitesTable = ({ data }: Props) => {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-gray-50"
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onDoubleClick={() => {
+                    // TODO:
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -140,7 +156,7 @@ const JobSitesTable = ({ data }: Props) => {
                   className="h-24 text-center"
                 >
                   <div className="flex flex-col items-center justify-center space-y-3">
-                    <p className="text-gray-500 text-lg">No job sites found.</p>
+                    <p className="text-gray-500 text-lg">No items found.</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -152,4 +168,4 @@ const JobSitesTable = ({ data }: Props) => {
   );
 };
 
-export { JobSitesTable };
+export { InventoryTable };

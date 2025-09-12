@@ -1,7 +1,7 @@
 export type JobSiteT = {
   id: string;
   name: string;
-  status: "In Progress" | "Completed" | "On Hold";
+  status: "in_progress" | "completed" | "on_hold";
   categories: CategoryT[];
 };
 

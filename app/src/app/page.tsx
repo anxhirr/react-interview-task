@@ -1,6 +1,7 @@
-import { JobSitesList } from "@/components/JobSitesList";
+import { redirect } from "next/navigation";
 
-export default function Home() {
-  // TODO: query the data from the database and pass it to the JobSitesList component
-  return <JobSitesList />;
-}
+const Page = () => {
+  redirect("/jobsites/in_progress");
+};
+
+export default Page;

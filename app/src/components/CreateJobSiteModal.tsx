@@ -41,7 +41,7 @@ const schema = z.object({
     .string()
     .min(1, "Job site name is required")
     .max(100, "Name must be less than 100 characters"),
-  status: z.enum(["In Progress", "On Hold", "Completed"]),
+  status: z.enum(["in_progress", "on_hold", "completed"]),
   categories: z
     .array(z.enum(["Sidewalk Shed", "Scaffold", "Shoring"]))
     .min(1, "At least one category is required"),
@@ -61,7 +61,7 @@ export function CreateJobSiteModal({ open, onOpenChange }: Props) {
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
-      status: "In Progress",
+      status: "in_progress",
       categories: ["Scaffold"],
     },
   });
@@ -87,7 +87,7 @@ export function CreateJobSiteModal({ open, onOpenChange }: Props) {
     // Reset form
     form.reset({
       name: "",
-      status: "In Progress",
+      status: "in_progress",
       categories: ["Sidewalk Shed", "Scaffold", "Shoring"],
     });
     onOpenChange(false);
@@ -151,9 +151,9 @@ export function CreateJobSiteModal({ open, onOpenChange }: Props) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="In Progress">In Progress</SelectItem>
-                      <SelectItem value="On Hold">On Hold</SelectItem>
-                      <SelectItem value="Completed">Completed</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="on_hold">On Hold</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
