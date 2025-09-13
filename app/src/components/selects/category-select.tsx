@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/popover";
 import { useQuery } from "@tanstack/react-query";
 import { Check, ChevronDown, X } from "lucide-react";
+import { SmallDot } from "../layout";
 
 type Props = {
   value: string[];
@@ -22,7 +23,7 @@ const CategorySelect = ({
   onValueChange,
   placeholder = "Select categories to add",
 }: Props) => {
-  const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
+  const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     queryFn: getCategoriesAction,
     gcTime: 0, // always fetch fresh data
@@ -54,29 +55,33 @@ const CategorySelect = ({
               <ChevronDown className="opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="p-0 popover-content-width-full">
+          <PopoverContent className="p-1 popover-content-width-full">
             <div className="space-y-1">
-              {isLoadingCategories ? (
-                <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                  Loading categories...
-                </div>
-              ) : categories.length === 0 ? (
+              {categories.length === 0 ? (
                 <div className="px-2 py-1.5 text-sm text-muted-foreground">
                   No categories available
                 </div>
               ) : (
-                categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => toggleCategory(category.id)}
-                    className="flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
-                  >
-                    <span>{category.name}</span>
-                    {value.includes(category.id) && (
-                      <Check className="h-4 w-4 text-green-600" />
-                    )}
-                  </button>
-                ))
+                categories.map((category) => {
+                  const isSelected = value.includes(category.id);
+                  return (
+                    <Button
+                      key={category.id}
+                      onClick={() => toggleCategory(category.id)}
+                      className="w-full flex justify-between items-center"
+                      variant="ghost"
+                      style={{
+                        backgroundColor: isSelected
+                          ? category.color
+                          : undefined,
+                        color: isSelected ? "white" : category.color,
+                      }}
+                    >
+                      <span>{category.name}</span>
+                      {value.includes(category.id) && <Check />}
+                    </Button>
+                  );
+                })
               )}
             </div>
           </PopoverContent>
@@ -85,21 +90,19 @@ const CategorySelect = ({
 
       <div className="flex flex-wrap gap-2">
         {value.map((categoryId) => {
-          const category = categories.find((cat) => cat.id === categoryId);
+          const category = categories.find((cat) => cat.id === categoryId)!;
           return (
-            <Badge
-              key={categoryId}
-              variant="secondary"
-              className="flex items-center gap-1 px-2 py-1"
-            >
-              {category?.name || "Unknown"}
-              <button
-                type="button"
+            <Badge key={categoryId} variant="secondary">
+              <SmallDot color={category.color} />
+              {category.name}
+              <Button
+                size="icon"
                 onClick={() => removeCategory(categoryId)}
-                className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
+                variant="destructive"
+                className="size-5"
               >
-                <X className="h-3 w-3" />
-              </button>
+                <X />
+              </Button>
             </Badge>
           );
         })}

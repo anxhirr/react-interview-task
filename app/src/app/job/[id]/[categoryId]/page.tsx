@@ -1,7 +1,7 @@
 import { getItemsAction, getJobAction } from "@/actions";
 import { AddItemBtn } from "@/components/buttons";
 import { SearchInput } from "@/components/inputs";
-import { EmptyState } from "@/components/layout";
+import { EmptyState, SmallDot } from "@/components/layout";
 import { ItemTable } from "@/components/tables";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import {
   JOB_SITE_STATUS_COLORS,
   JOB_SITE_STATUS_LABELS,
 } from "@/constants/map";
-import { ArrowLeft, Package } from "lucide-react";
+import { ArrowLeft, Check, Package } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -69,26 +69,27 @@ const Page = async ({ params, searchParams }: Props) => {
               <h2 className="text-lg font-semibold">Categories</h2>
             </div>
             <div className="p-2 flex-1 overflow-auto">
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/job/${job.id}/${category.id}`}
-                  className={`w-full text-left p-3 rounded-lg mb-2 transition-colors block ${
-                    categoryId === category.id
-                      ? "bg-blue-50 border border-blue-200 text-blue-900"
-                      : "hover:bg-gray-50 border border-transparent"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{category.name}</span>
-                    <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
-                      {category.id === categoryId
-                        ? itemsResult.pagination.total
-                        : category.items.length}
-                    </span>
-                  </div>
-                </Link>
-              ))}
+              {categories.map((category) => {
+                const isSelected = categoryId === category.id;
+
+                return (
+                  <Link
+                    key={category.id}
+                    href={`/job/${job.id}/${category.id}`}
+                    className="w-full p-3 rounded-lg mb-2 flex items-center border hover:opacity-80"
+                    style={{
+                      backgroundColor: isSelected ? category.color : undefined,
+                      color: isSelected ? "white" : category.color,
+                    }}
+                  >
+                    <div className="flex items-center gap-2 flex-1">
+                      <SmallDot color={category.color} />
+                      <span className="font-medium">{category.name}</span>
+                    </div>
+                    {isSelected && <Check className="size-4" />}
+                  </Link>
+                );
+              })}
             </div>
             <div className="p-4 border-t">
               <Link href={`/job/list/${job.status}`} className="w-full">
@@ -109,9 +110,15 @@ const Page = async ({ params, searchParams }: Props) => {
             {selectedCategory ? (
               <>
                 <div className="p-4 border-b">
-                  <h2 className="text-lg font-semibold">
-                    {selectedCategory.name}
-                  </h2>
+                  <div className="flex items-center gap-3">
+                    <SmallDot color={selectedCategory.color} />
+                    <h2
+                      className="text-lg font-semibold"
+                      style={{ color: selectedCategory.color }}
+                    >
+                      {selectedCategory.name}
+                    </h2>
+                  </div>
                   <p className="text-sm text-gray-600 mt-1">
                     Double-click on any row to edit the item
                   </p>

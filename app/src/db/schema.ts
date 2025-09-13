@@ -8,6 +8,7 @@ export const category = pgTable("category", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	name: text().notNull(),
+	color: text().notNull(),
 });
 
 export const item = pgTable("item", {
