@@ -66,30 +66,13 @@ const columns: ColumnDef<ItemT>[] = [
 const ItemTable = ({ data, pagination }: Props) => {
   const [editingRow, setEditingRow] = useState<ItemT | null>(null);
 
-  // Update columns to handle double-click for editing
-  const editableColumns: ColumnDef<ItemT>[] = columns.map((col) => ({
-    ...col,
-    cell: ({ row, ...cellProps }) => {
-      const originalCell = col.cell;
-      return (
-        <div
-          className="cursor-pointer"
-          onDoubleClick={() => setEditingRow(row.original)}
-        >
-          {typeof originalCell === "function"
-            ? originalCell({ row, ...cellProps })
-            : originalCell}
-        </div>
-      );
-    },
-  }));
-
   return (
     <>
       <DataTable
-        columns={editableColumns}
+        columns={columns}
         data={data}
         pagination={pagination}
+        onRowDoubleClick={(row) => setEditingRow(row.original)}
       />
       <ItemDialog
         open={!!editingRow}

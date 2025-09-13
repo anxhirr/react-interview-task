@@ -13,6 +13,7 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  Row,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -20,12 +21,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   pagination: PaginationT;
+  onRowDoubleClick?: (row: Row<TData>) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   pagination,
+  onRowDoubleClick,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -70,6 +73,7 @@ export function DataTable<TData, TValue>({
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   className="hover:bg-gray-50"
+                  onDoubleClick={() => onRowDoubleClick?.(row)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

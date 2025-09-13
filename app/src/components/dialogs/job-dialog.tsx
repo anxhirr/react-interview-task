@@ -5,6 +5,7 @@ import { DialogActions } from "@/components/dialogs/dialog-actions";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -79,6 +80,9 @@ const Content = ({ onOpenChange }: Props) => {
     <>
       <DialogHeader>
         <DialogTitle>Create New Job Site</DialogTitle>
+        <DialogDescription>
+          Fill in the details to create a new job site.
+        </DialogDescription>
       </DialogHeader>
 
       <Form {...form}>

@@ -1,7 +1,7 @@
 import { getJobsAction } from "@/actions";
 import { AddJobBtn } from "@/components/buttons";
+import { SearchInput } from "@/components/inputs";
 import { JobTable } from "@/components/tables";
-import { SearchInput } from "@/components/ui/search-input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DEFAULT_LIMIT, DEFAULT_PAGE } from "@/constants/defaults";
 import { JOB_SITE_STATUS_LABELS } from "@/constants/map";

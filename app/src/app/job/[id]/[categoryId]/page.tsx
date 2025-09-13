@@ -1,9 +1,9 @@
 import { getItemsAction, getJobAction } from "@/actions";
 import { AddItemBtn } from "@/components/buttons";
+import { SearchInput } from "@/components/inputs";
 import { ItemTable } from "@/components/tables";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SearchInput } from "@/components/ui/search-input";
 import { DEFAULT_LIMIT, DEFAULT_PAGE } from "@/constants/defaults";
 import {
   JOB_SITE_STATUS_COLORS,

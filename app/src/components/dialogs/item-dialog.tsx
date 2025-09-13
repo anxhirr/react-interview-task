@@ -5,6 +5,7 @@ import { DialogActions } from "@/components/dialogs/dialog-actions";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -91,6 +92,11 @@ const Content = ({ onOpenChange, item }: Props) => {
     <>
       <DialogHeader>
         <DialogTitle>{isEditing ? "Edit Item" : "Create New Item"}</DialogTitle>
+        <DialogDescription>
+          {isEditing
+            ? "Update the item details below."
+            : "Fill in the details to create a new item."}
+        </DialogDescription>
       </DialogHeader>
 
       <Form {...form}>
