@@ -98,4 +98,16 @@ const getJobsAction = async (
   };
 };
 
-export { createJobAction, getJobAction, getJobsAction };
+const getJobCountsAction = async () => {
+  const counts = await db
+    .select({
+      status: job.status,
+      count: count(),
+    })
+    .from(job)
+    .groupBy(job.status);
+
+  return counts;
+};
+
+export { createJobAction, getJobAction, getJobCountsAction, getJobsAction };

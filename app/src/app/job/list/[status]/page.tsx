@@ -1,4 +1,4 @@
-import { getJobsAction } from "@/actions";
+import { getJobCountsAction, getJobsAction } from "@/actions";
 import { AddJobBtn } from "@/components/buttons";
 import { SearchInput } from "@/components/inputs";
 import { JobTable } from "@/components/tables";
@@ -55,11 +55,14 @@ const Page = async ({ params, searchParams }: Props) => {
 
   if (!validStatuses.includes(status)) return notFound();
 
-  const { data, pagination } = await getJobsAction(status, {
-    page: Number(page),
-    limit: Number(limit),
-    search,
-  });
+  const [{ data, pagination }, jobCounts] = await Promise.all([
+    getJobsAction(status, {
+      page: Number(page),
+      limit: Number(limit),
+      search,
+    }),
+    getJobCountsAction(),
+  ]);
 
   return (
     <>
@@ -77,6 +80,9 @@ const Page = async ({ params, searchParams }: Props) => {
         <Tabs value={status} className="w-full">
           <TabsList className="grid w-full grid-cols-3 h-14 p-1">
             {tabsConfig.map((tab) => {
+              const jobCount = jobCounts.find(
+                (count) => count.status === tab.value
+              )?.count;
               return (
                 <TabsTrigger
                   key={tab.value}
@@ -89,7 +95,7 @@ const Page = async ({ params, searchParams }: Props) => {
                   asChild
                 >
                   <Link href={`/job/list/${tab.value}`}>
-                    {JOB_SITE_STATUS_LABELS[tab.value]}
+                    {JOB_SITE_STATUS_LABELS[tab.value]} ({jobCount || 0})
                   </Link>
                 </TabsTrigger>
               );
