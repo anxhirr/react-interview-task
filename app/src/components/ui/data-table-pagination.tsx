@@ -70,39 +70,43 @@ function DataTablePagination<TData>({ table }: Props<TData>) {
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
-            className="hidden h-8 w-8 p-0 lg:flex"
+            size="icon"
+            className="hidden size-8 lg:flex"
             onClick={() => handlePageChange(1)}
             disabled={currentPage <= 1}
           >
             <span className="sr-only">Go to first page</span>
-            <ChevronsLeft className="h-4 w-4" />
+            <ChevronsLeft />
           </Button>
           <Button
             variant="outline"
-            className="h-8 w-8 p-0"
+            size="icon"
+            className="size-8"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage <= 1}
           >
             <span className="sr-only">Go to previous page</span>
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft />
           </Button>
           <Button
             variant="outline"
-            className="h-8 w-8 p-0"
+            size="icon"
+            className="size-8"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage >= pageCount}
           >
             <span className="sr-only">Go to next page</span>
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight />
           </Button>
           <Button
             variant="outline"
-            className="hidden h-8 w-8 p-0 lg:flex"
+            size="icon"
+            className="hidden size-8 lg:flex"
             onClick={() => handlePageChange(pageCount)}
             disabled={currentPage >= pageCount}
           >
             <span className="sr-only">Go to last page</span>
-            <ChevronsRight className="h-4 w-4" />
+            <ChevronsRight />
           </Button>
         </div>
       </div>
