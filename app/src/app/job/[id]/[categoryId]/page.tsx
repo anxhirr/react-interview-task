@@ -1,6 +1,7 @@
 import { getItemsAction, getJobAction } from "@/actions";
 import { AddItemBtn } from "@/components/buttons";
 import { SearchInput } from "@/components/inputs";
+import { EmptyState } from "@/components/layout";
 import { ItemTable } from "@/components/tables";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,12 +10,12 @@ import {
   JOB_SITE_STATUS_COLORS,
   JOB_SITE_STATUS_LABELS,
 } from "@/constants/map";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Package } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 type Props = {
-  params: Promise<{ id: string; categoryId: string }>;
+  params: Promise<{ id: string; categoryId?: string }>;
   searchParams: Promise<{ page?: string; limit?: string; search?: string }>;
 };
 
@@ -103,29 +104,36 @@ const Page = async ({ params, searchParams }: Props) => {
           </div>
         </div>
 
-        {/* Items Content */}
         <div className="flex-1">
           <div className="bg-white rounded-lg border h-full">
-            <div className="p-4 border-b">
-              <h2 className="text-lg font-semibold">
-                {selectedCategory?.name || "Select a Category"}
-              </h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Double-click on any row to edit the item
-              </p>
-            </div>
-            <div className="p-4">
-              <SearchInput
-                placeholder="Search items by name, description, or notes..."
-                className="mb-4"
+            {selectedCategory ? (
+              <>
+                <div className="p-4 border-b">
+                  <h2 className="text-lg font-semibold">
+                    {selectedCategory.name}
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Double-click on any row to edit the item
+                  </p>
+                </div>
+
+                <div className="p-4">
+                  <SearchInput placeholder="Search items by name, description, or notes..." />
+                </div>
+                <div className="px-4">
+                  <ItemTable
+                    data={itemsResult.data}
+                    pagination={itemsResult.pagination}
+                  />
+                </div>
+              </>
+            ) : (
+              <EmptyState
+                title="No Category Selected"
+                description="Please select a category from the sidebar to view its items and start managing your inventory."
+                icon={<Package className="size-12" />}
               />
-            </div>
-            <div className="px-4 pb-4 h-[calc(100%-140px)] overflow-auto">
-              <ItemTable
-                data={itemsResult.data}
-                pagination={itemsResult.pagination}
-              />
-            </div>
+            )}
           </div>
         </div>
       </div>
